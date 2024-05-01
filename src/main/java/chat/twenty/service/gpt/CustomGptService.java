@@ -1,8 +1,6 @@
 package chat.twenty.service.gpt;
 
-import chat.twenty.domain.BaseMessage;
 import chat.twenty.domain.ChatMessage;
-import chat.twenty.domain.TwentyMessage;
 import chat.twenty.dto.ChatMessageDto;
 import chat.twenty.dto.TwentyMessageDto;
 import chat.twenty.enums.ChatMessageType;
@@ -11,13 +9,12 @@ import chat.twenty.enums.UserType;
 import chat.twenty.service.lower.ChatMessageService;
 import chat.twenty.service.lower.ChatRoomService;
 import chat.twenty.service.lower.RoomMemberService;
-import chat.twenty.service.lower.TwentyMessageService;
 import io.github.flashvayne.chatgpt.dto.chat.MultiChatMessage;
 import io.github.flashvayne.chatgpt.exception.ChatgptException;
 import io.github.flashvayne.chatgpt.service.ChatgptService;
-import io.netty.channel.ConnectTimeoutException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -41,7 +38,7 @@ public class CustomGptService {
     private final RoomMemberService memberService;
     private final ChatRoomService roomService;
     private final ChatMessageService chatMessageService;
-    private final TwentyMessageService twentyMessageService;
+//    private final TwentyMessageService twentyMessageService;
 
     /**
      * Member 와 Chatroom 에서 gpt 활성화, 활성화된 gpt 의 UUID 반환
@@ -109,10 +106,10 @@ public class CustomGptService {
         TwentyGameSubject subject = roomService.findById(roomId).getSubject();
 
         // roomId 와 gptUuid 를 기반으로, 현재 gpt 와의 채팅목록 조회
-        List<TwentyMessage> twentyMessageList = twentyMessageService.findCurrentGptQueue(roomId, gptUuid);
+        List<ChatMessage> twentyMessageList = chatMessageService.findCurrentGptQueue(roomId, gptUuid);
 
         // 첫번째 메시지 프롬프트로 변경
-        TwentyMessage firstMessage = twentyMessageList.get(0);
+        ChatMessage firstMessage = twentyMessageList.get(0);
         String twentyAnswer = roomService.findTwentyAnswer(roomId); // nullable
         setSystemPrompt(firstMessage, firstMessage.getType(), subject, twentyAnswer);
 
@@ -135,7 +132,7 @@ public class CustomGptService {
      * @param firstMessage     : content 가 프롬프트로 replace 될 BaseMessage.
      * @param firstMessageType : TWENTY_GAME_START, ACTIVATE_GPT
      */
-    protected void setSystemPrompt(BaseMessage firstMessage, ChatMessageType firstMessageType, TwentyGameSubject subject, String answer) {
+    protected void setSystemPrompt(ChatMessage firstMessage, ChatMessageType firstMessageType, TwentyGameSubject subject, String answer) {
 
         firstMessage.setGptSystemRole();
 
@@ -159,7 +156,7 @@ public class CustomGptService {
     /**
      * GPT 에 보낼 메시지 리스트를 라이브러리 스펙 List<MultiChatMessage>에 맞게 생성
      */
-    protected List<MultiChatMessage> makeGptRequestList(List<? extends BaseMessage> messageList) {
+    protected List<MultiChatMessage> makeGptRequestList(List<ChatMessage> messageList) {
         // MultiChatMessage 리스트 생성
         List<MultiChatMessage> requestMessageList = new ArrayList<>();
 

@@ -1,10 +1,10 @@
 package chat.twenty.service;
 
-import chat.twenty.domain.TwentyMessage;
+import chat.twenty.domain.ChatMessage;
 import chat.twenty.dto.MessageDtoMapper;
 import chat.twenty.dto.TwentyMessageDto;
 import chat.twenty.enums.ChatMessageType;
-import chat.twenty.service.lower.TwentyMessageService;
+import chat.twenty.service.lower.ChatMessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 public class TwentyMessageDtoProcessor {
 
     private final TwentyGameService twentyService; // twentyService 에만 의존할 것.
-    private final TwentyMessageService twentyMessageService; // DB 저장에만 사용
+    private final ChatMessageService chatMessageService; // DB 저장에만 사용
 
     public TwentyMessageDto processMessage(TwentyMessageDto twentyMessageDto) {
         Long roomId = twentyMessageDto.getRoomId();
@@ -57,8 +57,8 @@ public class TwentyMessageDtoProcessor {
         twentyMessageDto.setCreatedAt(LocalDateTime.now().withNano(0));
 
         // DB 에 메시지 저장
-        TwentyMessage twentyMessage = MessageDtoMapper.INSTANCE.toTwentyMessage(twentyMessageDto);
-        twentyMessageService.saveMessage(twentyMessage);
+        ChatMessage twentyMessage = MessageDtoMapper.INSTANCE.toTwentyMessageFromTwenty(twentyMessageDto);
+        chatMessageService.saveMessage(twentyMessage);
 
         log.info("FINISH processMessage() TwentyMessageDto = {}", twentyMessageDto);
 
@@ -92,8 +92,8 @@ public class TwentyMessageDtoProcessor {
         resultTwentyMessageDto.setCreatedAt(LocalDateTime.now().withNano(0));
 
         // DB 에 메시지 저장
-        TwentyMessage twentyMessage = MessageDtoMapper.INSTANCE.toTwentyMessage(resultTwentyMessageDto);
-        twentyMessageService.saveMessage(twentyMessage);
+        ChatMessage twentyMessage = MessageDtoMapper.INSTANCE.toTwentyMessageFromTwenty(resultTwentyMessageDto);
+        chatMessageService.saveMessage(twentyMessage);
 
         log.info("FINISH processGPT() TwentyMessageDto = {}, ResultTwentyMessageDto = {}", twentyMessageDto, resultTwentyMessageDto);
 

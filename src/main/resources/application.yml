@@ -10,12 +10,17 @@ spring:
       produce-partial-output-while-processing: false # csrf 토큰 삽입을 위해, 타임리프의 결과반환을 미룸.
   messages:
     basename: errorMessage
+  jpa:
+    hibernate:
+      ddl-auto: create
+
 
 mybatis:
   type-aliases-package: chat.twenty.domain
   mapper-locations: classpath:mapper/*.xml # resources/mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
+
 
 logging:
   config: classpath:logback-local.xml

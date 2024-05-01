@@ -1,12 +1,9 @@
 package chat.twenty.service.lower;
 
 import chat.twenty.domain.ChatMessage;
-import chat.twenty.domain.ChatRoom;
-import chat.twenty.domain.RoomMember;
 import chat.twenty.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +16,7 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
 
     public ChatMessage saveMessage(ChatMessage chatMessage) {
+
         return chatMessageRepository.save(chatMessage);
     }
 

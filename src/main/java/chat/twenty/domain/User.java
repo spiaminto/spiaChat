@@ -3,8 +3,6 @@ package chat.twenty.domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Random;
-
 @Data
 @NoArgsConstructor
 public class User {
