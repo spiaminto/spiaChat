@@ -1,7 +1,7 @@
 package chat.twenty.service.lower;
 
 import chat.twenty.domain.ChatRoom;
-import chat.twenty.repository.ChatRoomRepository;
+import chat.twenty.repository.LegacyChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class ChatRoomService {
-    private final ChatRoomRepository repository;
+    private final LegacyChatRoomRepository repository;
 
     public ChatRoom findById(Long id) {
         return repository.findById(id);

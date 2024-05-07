@@ -1,8 +1,8 @@
 package chat.twenty.service.lower;
 
 import chat.twenty.domain.RoomMember;
-import chat.twenty.repository.RoomMemberRepository;
-import chat.twenty.repository.UserRepository;
+import chat.twenty.repository.LegacyRoomMemberRepository;
+import chat.twenty.repository.LegacyUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,8 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RoomMemberService {
 
-    private final RoomMemberRepository repository;
-    private final UserRepository userRepository; // username 사용
+    private final LegacyRoomMemberRepository repository;
+    private final LegacyUserRepository legacyUserRepository; // username 사용
 
     // public
     public RoomMember findById(Long roomId, Long userId) {
@@ -95,7 +95,7 @@ public class RoomMemberService {
     // protected =======================================================================================
 
     protected RoomMember save(Long roomId, Long userId) {
-        RoomMember roomMember = new RoomMember(roomId, userId, userRepository.findById(userId).getUsername());
+        RoomMember roomMember = new RoomMember(roomId, userId, legacyUserRepository.findById(userId).getUsername());
         return repository.save(roomMember); // repository 에서 재조회 해줌
     }
 

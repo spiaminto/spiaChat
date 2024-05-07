@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 @SpringBootTest
 @Slf4j
 @Transactional
-class ChatMessageRepositoryTest {
+class LegacyChatMessageRepositoryTest {
 
     @Autowired
-    ChatMessageRepository chatMessageRepository;
+    LegacyChatMessageRepository legacyChatMessageRepository;
     List<ChatMessage> testChatMessageList;
 
     @BeforeEach
@@ -35,31 +35,31 @@ class ChatMessageRepositoryTest {
 
     @Test
     void saveAndFindById() {
-        testChatMessageList.forEach(message -> chatMessageRepository.save(message));
+        testChatMessageList.forEach(message -> legacyChatMessageRepository.save(message));
 
         testChatMessageList.stream()
-                .map(message -> chatMessageRepository.save(message))
+                .map(message -> legacyChatMessageRepository.save(message))
                 // save() 로 리턴된 Stream<Message>
                 .forEach(message -> {
-                    Assertions.assertThat(chatMessageRepository.findById(message.getId()))
+                    Assertions.assertThat(legacyChatMessageRepository.findById(message.getId()))
                             .isEqualToIgnoringGivenFields(message, "createdAt");
                 });
     }
 
     @Test
     void findAll() {
-        testChatMessageList.forEach(message -> chatMessageRepository.save(message));
+        testChatMessageList.forEach(message -> legacyChatMessageRepository.save(message));
 
-        List<ChatMessage> findChatMessageList = chatMessageRepository.findAll();
+        List<ChatMessage> findChatMessageList = legacyChatMessageRepository.findAll();
 
         Assertions.assertThat(findChatMessageList).usingElementComparatorIgnoringFields("createdAt").containsAll(testChatMessageList);
     }
 
     @Test
     void findByRoomId() {
-        testChatMessageList.forEach(message -> chatMessageRepository.save(message));
+        testChatMessageList.forEach(message -> legacyChatMessageRepository.save(message));
 
-        List<ChatMessage> findChatMessageList = chatMessageRepository.findByRoomId(1L);
+        List<ChatMessage> findChatMessageList = legacyChatMessageRepository.findByRoomId(1L);
 
         List<ChatMessage> room1LChatMessageList = testChatMessageList.stream().filter(message -> message.getRoomId().equals(1L)).collect(Collectors.toList());
         Assertions.assertThat(findChatMessageList).usingElementComparatorIgnoringFields("createdAt").containsAll(room1LChatMessageList);
@@ -67,9 +67,9 @@ class ChatMessageRepositoryTest {
 
     @Test
     void findByRoomIdAndUserId() {
-        testChatMessageList.forEach(message -> chatMessageRepository.save(message));
+        testChatMessageList.forEach(message -> legacyChatMessageRepository.save(message));
 
-        List<ChatMessage> findChatMessageList = chatMessageRepository.findByRoomIdAndUserId(1L, 1L);
+        List<ChatMessage> findChatMessageList = legacyChatMessageRepository.findByRoomIdAndUserId(1L, 1L);
 
         List<ChatMessage> room1LUser1LChatMessageList = testChatMessageList.stream().filter(message -> message.getRoomId().equals(1L) && message.getUserId().equals(1L)).collect(Collectors.toList());
         Assertions.assertThat(findChatMessageList).usingElementComparatorIgnoringFields("createdAt").containsAll(room1LUser1LChatMessageList);
@@ -77,24 +77,24 @@ class ChatMessageRepositoryTest {
 
     @Test
     void update() {
-        testChatMessageList.forEach(message -> chatMessageRepository.save(message));
+        testChatMessageList.forEach(message -> legacyChatMessageRepository.save(message));
 
         ChatMessage updateChatMessage = testChatMessageList.get(0);
         updateChatMessage.setContent("updateMessage");
 
-        chatMessageRepository.update(updateChatMessage.getId(), updateChatMessage);
+        legacyChatMessageRepository.update(updateChatMessage.getId(), updateChatMessage);
 
-        Assertions.assertThat(chatMessageRepository.findById(updateChatMessage.getId()))
+        Assertions.assertThat(legacyChatMessageRepository.findById(updateChatMessage.getId()))
                 .isEqualToIgnoringGivenFields(updateChatMessage, "createdAt");
     }
 
     @Test
     void deleteById() {
-        testChatMessageList.forEach(message -> chatMessageRepository.save(message));
+        testChatMessageList.forEach(message -> legacyChatMessageRepository.save(message));
 
         Long deleteMessageId = testChatMessageList.get(0).getId();
-        chatMessageRepository.deleteById(deleteMessageId);
+        legacyChatMessageRepository.deleteById(deleteMessageId);
 
-        Assertions.assertThat(chatMessageRepository.findById(deleteMessageId)).isNull();
+        Assertions.assertThat(legacyChatMessageRepository.findById(deleteMessageId)).isNull();
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 @Slf4j
 @RequiredArgsConstructor
-public class ChatMessageRepository {
+public class LegacyChatMessageRepository {
 
     private final ChatMessageMapper chatMessageMapper;
 

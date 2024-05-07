@@ -1,7 +1,7 @@
 package chat.twenty.service.lower;
 
 import chat.twenty.domain.User;
-import chat.twenty.repository.UserRepository;
+import chat.twenty.repository.LegacyUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,7 +14,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository repository;
+    private final LegacyUserRepository repository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public User findById(Long id) {

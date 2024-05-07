@@ -16,7 +16,7 @@ public interface MessageDtoMapper {
     @Mapping(target = "type", source = "type")
     @Mapping(target = "content", source = "content")
     @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "isGptChat", source = "gptChat")
+    @Mapping(target = "gptChat", source = "gptChat")
     ChatMessage toTwentyMessageFromTwenty(TwentyMessageDto twentyMessageDto);
 //    TwentyMessageDto toTwentyMessageDto(TwentyMessage twentyMessage);
 
@@ -27,7 +27,7 @@ public interface MessageDtoMapper {
     @Mapping(target = "type", source = "type")
     @Mapping(target = "content", source = "content")
     @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "isGptChat", source = "gptChat")
+    @Mapping(target = "gptChat", source = "gptChat")
     ChatMessage toChatMessage(ChatMessageDto chatMessageDto);
     ChatMessageDto toChatMessageDto(ChatMessage chatMessage);
 

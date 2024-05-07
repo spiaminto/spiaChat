@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class ChatRoomRepository {
+public class LegacyChatRoomRepository {
     private final ChatroomMapper roomMapper;
 
     public ChatRoom findById(Long id) {

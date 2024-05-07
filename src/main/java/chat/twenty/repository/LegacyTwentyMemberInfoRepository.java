@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class TwentyMemberInfoRepository {
+public class LegacyTwentyMemberInfoRepository {
     private final TwentyMemberInfoMapper mapper;
 
     public TwentyMemberInfo findById(Long userId) {

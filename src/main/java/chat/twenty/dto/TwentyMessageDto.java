@@ -26,7 +26,7 @@ public class TwentyMessageDto {
     private String content;
     private LocalDateTime createdAt; 
     @JsonProperty("isGptChat") // gptChat 으로 내부사용되는듯? DtoMapper 참조
-    private boolean isGptChat;      // Gpt 와의 대화인지 여부, 프론트에서 전달
+    private boolean gptChat;      // Gpt 와의 대화인지 여부, 프론트에서 전달
     private String gptUuid;         // GPT 의 UUID, UUID(8)
 
     // ====== DTO ONLY ========

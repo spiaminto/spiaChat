@@ -14,10 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @Slf4j
 @Transactional
-class RoomMemberRepositoryTest {
-    @Autowired ChatRoomRepository roomRepository;
-    @Autowired UserRepository userRepository;
-    @Autowired RoomMemberRepository memberRepository;
+class LegacyRoomMemberRepositoryTest {
+    @Autowired
+    LegacyChatRoomRepository roomRepository;
+    @Autowired
+    LegacyUserRepository legacyUserRepository;
+    @Autowired
+    LegacyRoomMemberRepository memberRepository;
 
     private ChatRoom testRoom;
     private User testUser;
@@ -26,7 +29,7 @@ class RoomMemberRepositoryTest {
     @BeforeEach
     void initTest() {
         log.info("initTest()");
-        testUser = userRepository.save(new User("memoryTestUser"));
+        testUser = legacyUserRepository.save(new User("memoryTestUser"));
         testRoom = roomRepository.save(new ChatRoom("memoryTestRoom"));
         testMember = new RoomMember(testRoom.getId(), testUser.getId(), testUser.getUsername());
     }

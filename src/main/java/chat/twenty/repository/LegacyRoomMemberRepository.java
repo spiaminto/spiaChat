@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class RoomMemberRepository {
+public class LegacyRoomMemberRepository {
 
     private final RoomMemberMapper memberMapper;
 

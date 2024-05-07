@@ -1,9 +1,8 @@
 spring:
   profiles:
-    active: local
     group:
-        local: gpt, local-db
-        deploy: gpt, eb-db
+        local: gpt, datasource
+        prod: gpt, datasource
   thymeleaf:
     prefix: classpath:/templates/   #spring.mvc.static-path-pattern=/static/**
     servlet:
@@ -12,7 +11,7 @@ spring:
     basename: errorMessage
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
 
 
 mybatis:

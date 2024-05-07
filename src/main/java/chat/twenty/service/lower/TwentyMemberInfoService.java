@@ -1,7 +1,7 @@
 package chat.twenty.service.lower;
 
 import chat.twenty.domain.TwentyMemberInfo;
-import chat.twenty.repository.TwentyMemberInfoRepository;
+import chat.twenty.repository.LegacyTwentyMemberInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class TwentyMemberInfoService {
-    private final TwentyMemberInfoRepository repository;
+    private final LegacyTwentyMemberInfoRepository repository;
 
     public TwentyMemberInfo findById(Long userId) {
         return repository.findById(userId);

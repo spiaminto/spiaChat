@@ -11,24 +11,22 @@ import java.time.LocalDateTime;
 @Getter @Setter @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@Entity  @Table(name = "chat_message")
 @Builder
 public class ChatMessage {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Long id;        // auto_increment
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "message_id") protected Long id;        // auto_increment
 
+    // 아래 두 id 는 index 걸것.
     protected Long roomId;
     protected Long userId;
-    protected String username;    // 조회를 줄이기 위해 username 필드 추가.
-    protected ChatMessageType type;       // DB DEFAULT NONE
-    protected String content;
 
-    @Column(columnDefinition = "TIMESTAMP") // 기본값지정: DEFAULT CURRENT_TIMESTAMP
-    protected LocalDateTime createdAt;  // DB DEFAULT CURRENT_TIMESTAMP
-
-    private boolean isGptChat;      // Gpt 와의 대화인지 여부, DB DEFAULT false
-    private String gptUuid;    // GPT activate 시의 세션구분. UUID(8)
+    @Column(columnDefinition = "varchar(16)") protected String username;    // 유저명
+    @Column(columnDefinition = "varchar(30)") protected ChatMessageType type;       // DB DEFAULT NONE
+    @Column(columnDefinition = "varchar(100)") protected String content;
+    @Column(columnDefinition = "TIMESTAMP") protected LocalDateTime createdAt;  // DB DEFAULT CURRENT_TIMESTAMP
+    @Column(columnDefinition = "TINYINT(1)") private boolean gptChat;      // Gpt 와의 대화인지 여부, DB DEFAULT false
+    @Column(columnDefinition = "varchar(8)") private String gptUuid;    // GPT activate 시의 세션구분. UUID(8)
 
     /**
      * 일반채팅 생성자
@@ -50,7 +48,7 @@ public class ChatMessage {
         this.username = username;
         this.type = type;
         this.content = content;
-        this.isGptChat = isGptChat;
+        this.gptChat = isGptChat;
         this.gptUuid = gptUuid;
         this.createdAt = LocalDateTime.now().withNano(0);
     }
