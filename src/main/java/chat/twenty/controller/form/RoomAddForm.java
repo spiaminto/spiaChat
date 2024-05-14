@@ -15,6 +15,6 @@ public class RoomAddForm {
     private ChatRoomType roomType;          // chatroom 타입
     private TwentyGameSubject subject;  // 스무고개 주제
     @Size(max = 10)
-    private String customSubject;       // 직접입력한 주제, 폼 기본값 ""
+    private String customSubject;       // 직접입력한 주제, 폼 기본값 " "
 
 }

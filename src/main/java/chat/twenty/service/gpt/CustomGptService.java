@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class CustomGptService {
     private final ChatgptService defaultGptService; // 라이브러리로 부터 DefaultChatGptService 를 주입받아 사용
     private final RoomMemberService memberService;
@@ -69,7 +71,7 @@ public class CustomGptService {
     }
 
     protected boolean validateGptOwner(Long roomId, Long userId) {
-        return memberService.findById(roomId, userId).isGptOwner();
+        return memberService.findByRoomIdAndUserId(roomId, userId).isGptOwner();
     }
 
     /**

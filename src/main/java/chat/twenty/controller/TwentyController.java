@@ -65,7 +65,7 @@ public class TwentyController {
     @GetMapping("/twenty-game/room/{roomId}/members")
     public Map<String, Object> getMemberList(@PathVariable Long roomId) {
         log.info("getUserList() roomId = {}", roomId);
-        List<RoomMember> memberList = memberService.findMemberList(roomId);
+        List<RoomMember> memberList = memberService.findRoomMembers(roomId);
         log.info("memberList = {}", memberList);
         return Map.of("memberList", memberList);
     }

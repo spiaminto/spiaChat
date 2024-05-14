@@ -1,33 +1,35 @@
 package chat.twenty.service.lower;
 
 import chat.twenty.domain.TwentyMemberInfo;
-import chat.twenty.repository.LegacyTwentyMemberInfoRepository;
+import chat.twenty.repository.TwentyMemberInfoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class TwentyMemberInfoService {
-    private final LegacyTwentyMemberInfoRepository repository;
-
+    private final TwentyMemberInfoRepository repository;
+    @Transactional(readOnly = true)
     public TwentyMemberInfo findById(Long userId) {
-        return repository.findById(userId);
+        return repository.findById(userId).orElse(null);
     }
-
+    @Transactional(readOnly = true)
     public List<TwentyMemberInfo> findByRoomId(Long roomId) {
         return repository.findByRoomId(roomId);
     }
-
+    @Transactional(readOnly = true)
     public TwentyMemberInfo findByRoomIdAndOrder(Long roomId, int order) {
-        return repository.findByRoomIdAndOrder(roomId, order);
+        return repository.findByRoomIdAndTwentyOrder(roomId, order);
     }
-
+    @Transactional(readOnly = true)
     public boolean isRoomAllDead(Long roomId) {
-        return repository.countByRoomIdAndIsAlive(roomId, true) == 0;
+        return repository.countByRoomIdAndAlive(roomId, true) == 0;
     }
 
     public TwentyMemberInfo save(TwentyMemberInfo twentyMemberInfo) {
@@ -35,31 +37,32 @@ public class TwentyMemberInfoService {
         return twentyMemberInfo;
     }
 
-    public int updateIsAlive(Long userId, boolean isAlive) {
-        return repository.updateIsAlive(userId, isAlive);
+    /**
+     * 한 멤버의 생존여부를 업데이트 (멤버는 한 게임에만 참여할 수 있음)
+     * @param userId
+     */
+    public void updateMemberAlive(Long userId, boolean isAlive) {
+         repository.findByUserId(userId).setAlive(isAlive);
     }
 
-    public int makeMemberAllAlive(Long roomId) {
-        return updateIsAliveAll(roomId, true);
+    /**
+     * 방의 모든 멤버의 생존 여부를 한번에 업데이트
+     * @param roomId
+     */
+    public void updateMembersAlive(Long roomId, boolean isAlive) {
+        repository.findByRoomId(roomId).forEach(twentyMemberInfo -> {
+            twentyMemberInfo.setAlive(isAlive);
+        });
     }
 
-    public int makeMemberNotAlive(Long UserId) {
-        return updateIsAlive(UserId, false);
-    }
-
-    protected int updateIsAliveAll(Long roomId, boolean isAlive) {
-        return repository.updateIsAliveAll(roomId, isAlive);
-    }
-
-    public int updateOrder(Long userId, int order) {
-        return repository.updateOrder(userId, order);
-    }
-
+    /**
+     * 게임중 멤버 나가면 삭제
+     */
     public boolean deleteByUserId(Long userId) {
-        return repository.delete(userId) == 1;
+        return repository.deleteByUserId(userId) == 1;
     }
 
-    public int deleteByRoomId(Long roomId) {
+    public long deleteByRoomId(Long roomId) {
         return repository.deleteByRoomId(roomId);
     }
 

@@ -5,6 +5,7 @@ import chat.twenty.service.gpt.CustomGptService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 일반 채팅 기능 상위 서비스
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class ChattingService {
     private final CustomGptService gptService;
 

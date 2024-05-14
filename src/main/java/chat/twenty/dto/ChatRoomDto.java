@@ -17,13 +17,13 @@ public class ChatRoomDto {
     private int twentyNext; // 스무고개 다음 순서
 
     // from count
-    private int memberCount;
-    private int connectedMemberCount;
+    private long memberCount;
+    private long connectedMemberCount;
 
     /**
      * ChatRoom -> ChatRoomDto with int connectedMemberCount
      */
-    public static ChatRoomDto from(ChatRoom chatRoom, int connectedMemberCount) {
+    public static ChatRoomDto from(ChatRoom chatRoom, long connectedMemberCount) {
         ChatRoomDto chatRoomDto = new ChatRoomDto();
         chatRoomDto.id = chatRoom.getId();
         chatRoomDto.name = chatRoom.getName();

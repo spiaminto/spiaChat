@@ -64,7 +64,7 @@ public class ChatController {
     @GetMapping("/chat/room/{roomId}/members")
     public Map<String, Object> getMemberList(@PathVariable Long roomId) {
         log.info("getUserList() roomId = {}", roomId);
-        List<RoomMember> memberList = memberService.findMemberList(roomId);
+        List<RoomMember> memberList = memberService.findRoomMembers(roomId);
         log.info("memberList = {}", memberList);
         return Map.of("memberList", memberList);
     }
@@ -74,7 +74,7 @@ public class ChatController {
     public Map<String, Object> checkGptOwner(@PathVariable Long roomId,
                                              @AuthenticationPrincipal PrincipalDetails principalDetails) {
         log.info("checkGptOwner() roomId = {}", roomId);
-        RoomMember findMember = memberService.findById(roomId, principalDetails.getUser().getId());
+        RoomMember findMember = memberService.findByRoomIdAndUserId(roomId, principalDetails.getUser().getId());
         return Map.of("isGptOwner", findMember.isGptOwner());
     }
 }

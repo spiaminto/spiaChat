@@ -50,16 +50,17 @@ public class LegacyRoomMemberRepository {
 
     public RoomMember save(RoomMember roomMember) {
 
-        RoomMember findMember = findById(roomMember.getRoomId(), roomMember.getUserId());
+//        RoomMember findMember = findById(roomMember.getRoomId(), roomMember.getUserId());
 
-        // 중복입력방지 ( 방 만들때 한번 들어감. 나중에 고치도록)
-        if (findMember != null) {
-            log.info("이미 존재하는 멤버입니다.");
-            return findMember;
-        }
-
-        memberMapper.save(roomMember);
-        return memberMapper.findById(roomMember.getRoomId(), roomMember.getUserId()); // DB 기본값 재조회
+//         중복입력방지 ( 방 만들때 한번 들어감. 나중에 고치도록)
+//        if (findMember != null) {
+//            log.info("이미 존재하는 멤버입니다.");
+//            return findMember;
+//        }
+//
+//        memberMapper.save(roomMember);
+//        return memberMapper.findById(roomMember.getRoomId(), roomMember.getUserId()); // DB 기본값 재조회
+        return null;
     }
 
 

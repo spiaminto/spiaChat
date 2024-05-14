@@ -37,9 +37,9 @@ public class ChatWebSocketEventListener {
         Long roomId = event.getRoomId();
 
         // 현재 접속한 사용자를 채팅방에 추가
-        memberService.enterRoom(roomId, user.getId());
+//        memberService.enterRoom(roomId, user.getId(), false);
         // 접속한 사용자의 isRoomConnected = true
-        memberService.updateRoomConnected(roomId, user.getId(), true);
+        memberService.connectToRoom(roomId, user.getId());
     }
 
     @EventListener
@@ -56,11 +56,11 @@ public class ChatWebSocketEventListener {
         Long roomId = event.getRoomId();
         Long userId = event.getUser().getId();
 
-        RoomMember currentMember = memberService.findById(roomId, userId);
+        RoomMember currentMember = memberService.findByRoomIdAndUserId(roomId, userId);
         if (currentMember == null) { return; /* Unsubscribe 에서 이미 나감 처리된 유저 */}
         
         // 현재 접속한 사용자를 채팅방에서 connected false
-        memberService.updateRoomConnected(roomId, userId, false);
+        memberService.disconnectFromRoom(roomId, userId);
 
         // 현재 접속한 사용자가 gptOwner 이면, gpt 비활성화
         if (currentMember.isGptOwner()) {
@@ -81,10 +81,10 @@ public class ChatWebSocketEventListener {
     public void WebSocketUnsubscribeListener(ChatUnsubscribeEvent event) {
         Long userId = event.getUser().getId();
         Long roomId = event.getRoomId();
-        RoomMember currentMember = memberService.findById(roomId, userId);
+        RoomMember currentMember = memberService.findByRoomIdAndUserId(roomId, userId);
 
         // 나간사람이 방장일때
-        if(memberService.findById(roomId, userId).isRoomOwner()) {
+        if(memberService.findByRoomIdAndUserId(roomId, userId).isRoomOwner()) {
             memberService.leaveRoomAllMember(roomId); // 방의 모든 member 삭제
             roomService.deleteById(roomId); // 방 삭제
             // 메시지는 일단 삭제하지 않음.

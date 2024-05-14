@@ -22,7 +22,7 @@ public class ChatMessage {
     protected Long userId;
 
     @Column(columnDefinition = "varchar(16)") protected String username;    // 유저명
-    @Column(columnDefinition = "varchar(30)") protected ChatMessageType type;       // DB DEFAULT NONE
+    @Column(columnDefinition = "varchar(30)") @Enumerated(EnumType.STRING) protected ChatMessageType type;       // DB DEFAULT NONE
     @Column(columnDefinition = "varchar(100)") protected String content;
     @Column(columnDefinition = "TIMESTAMP") protected LocalDateTime createdAt;  // DB DEFAULT CURRENT_TIMESTAMP
     @Column(columnDefinition = "TINYINT(1)") private boolean gptChat;      // Gpt 와의 대화인지 여부, DB DEFAULT false

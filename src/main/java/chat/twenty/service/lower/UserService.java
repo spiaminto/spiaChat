@@ -1,11 +1,12 @@
 package chat.twenty.service.lower;
 
 import chat.twenty.domain.User;
-import chat.twenty.repository.LegacyUserRepository;
+import chat.twenty.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,26 +14,20 @@ import java.util.Optional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
-    private final LegacyUserRepository repository;
+    private final UserRepository repository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public User findById(Long id) {
-        return repository.findById(id);
-    }
-
-    public Optional<User> findByUsername(String username) {
-        return repository.findByUsername(username);
+        return repository.findById(id).orElse(null);
     }
 
     public Optional<User> findByLoginId(String loginId) {
         return repository.findByLoginId(loginId);
     }
 
-    public List<User> findAll() {
-        return repository.findAll();
-    }
-
+    @Transactional
     public User save(User user) {
         // 비밀번호 암호화
         String rawPassword = user.getPassword();
@@ -42,16 +37,20 @@ public class UserService {
         user.setRole("ROLE_USER");
 
         repository.save(user);
-        return repository.findById(user.getId());
+        return user;
     }
 
-    public User update(Long id, User updateParam) {
-        repository.update(id, updateParam);
-        return repository.findById(id);
+    @Transactional
+    public Long updateUsername(Long id, User updateParam) {
+        repository.findById(id).ifPresent(user -> {
+            user.setUsername(updateParam.getUsername());
+        });
+        return id;
     }
 
-    public int deleteById(Long id) {
-        return repository.deleteById(id);
+    @Transactional
+    public void deleteById(Long id) {
+        repository.deleteById(id);
     }
 
     /**

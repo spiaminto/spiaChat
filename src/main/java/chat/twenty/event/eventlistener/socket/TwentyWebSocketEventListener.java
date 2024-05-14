@@ -16,6 +16,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 /**
  * subUrl /topic/twenty-game/{roomId} 으로 오는 stomp 메시지의 이벤트 처리
  */
@@ -36,9 +38,9 @@ public class TwentyWebSocketEventListener {
         Long currentRoomId = event.getRoomId();
 
         // 현재 접속한 사용자를 채팅방에 추가
-        memberService.enterRoom(currentRoomId, currentUserId);
+//        memberService.enterRoom(currentRoomId, currentUserId, false);
         // 접속한 사용자의 isRoomConnected = true
-        memberService.updateRoomConnected(currentRoomId, currentUserId, true);
+        memberService.connectToRoom(currentRoomId, currentUserId);
     }
 
     @EventListener
@@ -56,13 +58,12 @@ public class TwentyWebSocketEventListener {
         User user = event.getUser();
         Long roomId = event.getRoomId();
 
-        RoomMember currentMember = memberService.findById(roomId, user.getId());
-        if (currentMember == null) {
+        if (!memberService.existsMember(roomId, user.getId())) {
             return; /* Unsubscribe 에서 이미 나감 처리된 유저 */
         }
 
         // 현재 접속한 사용자를 채팅방에서 connected false
-        memberService.updateRoomConnected(roomId, user.getId(), false);
+        memberService.disconnectFromRoom(roomId, user.getId());
         memberService.twentyUnready(roomId, user.getId());
 
         // 게임중에 나가면, MemberInfo 삭제 (disconnect 가능)
@@ -83,7 +84,7 @@ public class TwentyWebSocketEventListener {
         Long roomId = event.getRoomId();
 
         // 나간사람이 방장일때
-        if (memberService.findById(roomId, user.getId()).isRoomOwner()) {
+        if (memberService.findByRoomIdAndUserId(roomId, user.getId()).isRoomOwner()) {
             memberService.leaveRoomAllMember(roomId); // 방의 모든 member 삭제
             roomService.deleteById(roomId); // 방 삭제
             // 메시지는 일단 삭제하지 않음.

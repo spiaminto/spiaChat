@@ -19,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -92,7 +93,7 @@ public class IndexController {
         ChatRoom savedRoom = roomService.save(chatRoom);
 
         // 방 멤버이자 오너로 입장
-        memberService.enterRoomByOwner(savedRoom.getId(), currentUser.getId());
+        memberService.enterRoom(savedRoom.getId(), currentUser.getId(), true);
 
         return "redirect:/room/" + savedRoom.getId();
     }
@@ -110,13 +111,13 @@ public class IndexController {
         }
         model.addAttribute("chatRoom", currentRoom);
 
-        // Member 정보 불러오기
-        RoomMember findMember = memberService.findById(roomId, principalDetails.getId());
-        if (findMember == null) {
+        // Member 존재여부 확인
+        if (!memberService.existsMember(roomId, principalDetails.getId())) {
             // 첫입장 처리
-            memberService.enterRoom(roomId, principalDetails.getId());
-            findMember = memberService.findById(roomId, principalDetails.getId());
+            memberService.enterRoom(roomId, principalDetails.getId(), false);
         }
+
+        RoomMember findMember = memberService.findByRoomIdAndUserId(roomId, principalDetails.getId());
         model.addAttribute("currentMember", findMember);
 
         ChatRoomType currentRoomType = currentRoom.getType();

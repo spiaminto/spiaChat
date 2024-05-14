@@ -30,4 +30,8 @@ public class TwentyMemberInfo {
         memberInfo.twentyOrder = order;
         return memberInfo;
     }
+
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
 }

@@ -304,6 +304,7 @@
           function sendMessage(chatMessageType) {
               let usernameVal = usernameInput.value;
               let contentVal = contentInput.value;
+              console.log("thCurrentMember = {}", thCurrentMember);
 
               // 입력값 없으면 중지
               if (!contentVal && (chatMessageType == 'CHAT' || chatMessageType == 'CHAT_TO_GPT')) {
@@ -316,7 +317,7 @@
                   ? true : false;
 
               let sendMessageDto = {
-                  'roomId': thCurrentMember.roomId,
+                  'roomId': thCurrentMember.room.id,
                   'userId': thCurrentMember.userId,
                   'type': chatMessageType,
                   'username': usernameVal,
