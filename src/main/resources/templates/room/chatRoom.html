@@ -135,6 +135,7 @@
 
       /*<![CDATA[*/
       let thCurrentMember = [[${currentMember}]];
+      let thCurrentRoom = [[${chatRoom}]];
       /*]]>*/
 
       // STOMP 변수
@@ -186,10 +187,7 @@
           let currentGptOwnerUsername = '';   // syncMemberList 에서 결정됨.
 
           // thCurrentMember 로 초기화할 변수 (갱신되지 않는 변수들)
-          // thCurrentMember 는 방장이 아닌 일반유저의 경우, 방 첫 입장때 null 이다.
-          let isCurrentUserRoomOwner =
-              thCurrentMember ? thCurrentMember.isRoomOwner : false; // 내가 방장인지 여부
-          // console.log("thCurrentMember = {}", thCurrentMember);
+          let isCurrentUserRoomOwner = thCurrentMember.isRoomOwner // 방장여부
 
           // 필요시 초기화될 변수
           let isGptOwner = false;   // gpt ACTIVATE 시킨 사람인지 여부
@@ -259,6 +257,13 @@
                   });
                   // 멤버리스트 초기화
                   initializeMemberList();
+
+                  // GPT 켜져있을때 버튼 비활성화
+                  if (thCurrentRoom.gptActivated) {
+                      isGptActivated = true;
+                      activateGptBtn.disabled = true;
+                      deactivateGptBtn.disabled = true;
+                  }
               });
           }
 
@@ -304,7 +309,7 @@
           function sendMessage(chatMessageType) {
               let usernameVal = usernameInput.value;
               let contentVal = contentInput.value;
-              console.log("thCurrentMember = {}", thCurrentMember);
+              // console.log("thCurrentMember = {}", thCurrentMember);
 
               // 입력값 없으면 중지
               if (!contentVal && (chatMessageType == 'CHAT' || chatMessageType == 'CHAT_TO_GPT')) {
@@ -317,7 +322,7 @@
                   ? true : false;
 
               let sendMessageDto = {
-                  'roomId': thCurrentMember.room.id,
+                  'roomId': thCurrentRoom.id,
                   'userId': thCurrentMember.userId,
                   'type': chatMessageType,
                   'username': usernameVal,
@@ -391,8 +396,9 @@
                   case 'CHAT_TO_GPT':
                       break;
                   case 'CHAT_FROM_GPT':
-
-                      // gpt 답변 생성 완료
+                      // 중간에 들어온 사람을 위해 이쪽에서도 갱신
+                      isGptActivated = true;
+                      currentGptUuid = responseMessage.gptUuid;
                       sendGptMessageBtn.style.display = 'block'; // 중간에 들어온 사람이 있을 수 있으므로, 다시 보이게 처리
                       sendGptMessageBtn.disabled = false;
                       break;
@@ -600,7 +606,7 @@
               memberUsername.textContent = modifiedMemberResponse.username;
               newMemberListItem.appendChild(memberUsername);
 
-              let isRoomOwner = modifiedMemberResponse.isRoomOwner; // boolean
+              let isRoomOwner = modifiedMemberResponse.roomOwner; // boolean
               if (isRoomOwner) {
                   let memberIsRoomOwner = document.createElement('span');
                   memberIsRoomOwner.classList.add('member-is-room-owner');
@@ -608,7 +614,7 @@
                   newMemberListItem.appendChild(memberIsRoomOwner);
               }
 
-              let isMemberConnected = modifiedMemberResponse.isRoomConnected; // boolean
+              let isMemberConnected = modifiedMemberResponse.roomConnected; // boolean
               let memberIsRoomConnected = document.createElement('span');
               memberIsRoomConnected.classList.add('member-is-room-connected');
               let connectedColorClass = isMemberConnected ? 'member-connected' : 'member-disconnected';
@@ -616,7 +622,7 @@
               memberIsRoomConnected.textContent = isMemberConnected ? '접속중' : "미접속";
               newMemberListItem.appendChild(memberIsRoomConnected);
 
-              let isMemberGptOwner = modifiedMemberResponse.isGptOwner; // boolean
+              let isMemberGptOwner = modifiedMemberResponse.gptOwner; // boolean
               if (isMemberGptOwner) {
                   let memberIsGptOwner = document.createElement('span');
                   memberIsGptOwner.classList.add('member-is-gpt-owner');

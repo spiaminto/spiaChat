@@ -21,9 +21,9 @@ public class HttpLogInterceptor implements HandlerInterceptor {
         String session = request.getSession(false) == null ? "null" : request.getSession().getId();
 
         if (queryString == null) {
-            log.info("HTTP REQUEST : {} {} session = {}", method, requestURI, session);
+            log.info("[HTTP REQUEST] : {} '{}' session = {}", method, requestURI, session);
         } else {
-            log.info("HTTP REQUEST : {} {}?{} session = {}", method, requestURI, queryString, session);
+            log.info("[HTTP REQUEST] : {} '{}?{}' session = {}", method, requestURI, queryString, session);
         }
 
         return true;

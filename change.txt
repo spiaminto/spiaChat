@@ -6,3 +6,11 @@ master commit1
 master commit 2
     도메인 Entity 변경 및 LegacyRepository 네이밍
     스프링 외부 속성 변경
+
+master commit 3
+    Repository Jpa 변경 완료. Service 수정 완료
+
+master commit 4
+    테스트, 버그 수정, Service 개선
+    레거시 코드 삭제 및 mybatis 등 의존성 제거
+    sql 최적화

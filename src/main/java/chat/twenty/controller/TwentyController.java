@@ -2,6 +2,7 @@ package chat.twenty.controller;
 
 import chat.twenty.domain.RoomMember;
 import chat.twenty.dto.TwentyMessageDto;
+import chat.twenty.enums.ChatMessageType;
 import chat.twenty.service.TwentyMessageDtoProcessor;
 import chat.twenty.service.lower.RoomMemberService;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +65,7 @@ public class TwentyController {
     @ResponseBody
     @GetMapping("/twenty-game/room/{roomId}/members")
     public Map<String, Object> getMemberList(@PathVariable Long roomId) {
-        log.info("getUserList() roomId = {}", roomId);
+//        log.info("getUserList() roomId = {}", roomId);
         List<RoomMember> memberList = memberService.findRoomMembers(roomId);
         log.info("memberList = {}", memberList);
         return Map.of("memberList", memberList);

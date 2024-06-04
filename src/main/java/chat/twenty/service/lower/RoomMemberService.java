@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,12 +20,11 @@ import java.util.Optional;
 @Transactional
 public class RoomMemberService {
 
-    private final UserRepository userRepository;
     private final RoomMemberRepository repository;
-    private final ChatRoomRepository roomRepository;
 
     @Transactional(readOnly = true)
     public RoomMember findByRoomIdAndUserId(Long roomId, Long userId) {
+        log.info("findByRoomIdAndUserId::currentTx = {}", TransactionSynchronizationManager.getCurrentTransactionName());
         return repository.findByRoomIdAndUserId(roomId, userId);
     }
     @Transactional(readOnly = true)
@@ -53,9 +53,9 @@ public class RoomMemberService {
      * 방에 첫 입장
      * @param isOwner 방장 여부
      */
-    public void enterRoom(Long roomId, Long userId, boolean isOwner) {
-        ChatRoom room = roomRepository.findById(roomId).orElse(null);
-        RoomMember roomMember = new RoomMember(room, userId, userRepository.findById(userId).get().getUsername());
+    public void enterRoom(ChatRoom room, Long userId, String username, boolean isOwner) {
+//        ChatRoom room = roomRepository.findById(roomId).orElse(null);
+        RoomMember roomMember = new RoomMember(room, userId, username);
         if (isOwner) roomMember.setRoomOwner(true);
         repository.save(roomMember);
     }
@@ -74,30 +74,14 @@ public class RoomMemberService {
      * 유저를 방에 connect
      */
     public void connectToRoom(Long roomId, Long userId) {
-        repository.findByRoomIdAndUserId(roomId, userId).setRoomConnected(true);
+        repository.setConnectedByRoomIdAndUserId(roomId, userId, true);
     }
 
     /**
      * 유저를 방에서 disconnect
      */
     public void disconnectFromRoom(Long roomId, Long userId) {
-        repository.findByRoomIdAndUserId(roomId, userId).setRoomConnected(false);
-    }
-
-    // GPT ======================================================================
-
-    public String findGptUuidByRoomId(Long roomId) {
-        return repository.findGptUuidByRoomId(roomId).orElse(null);
-    }
-    public void updateGptUuid(Long roomId, Long userId, String gptUuid) {
-        repository.findByRoomIdAndUserId(roomId, userId).setGptUuid(gptUuid);
-    }
-    /**
-     * gptOwner 설정 후 해당 유저의 id 반환
-     */
-    public Long updateGptOwner(Long roomId, Long userId, boolean gptOwner) {
-        repository.findByRoomIdAndUserId(roomId, userId).setGptOwner(gptOwner);
-        return userId;
+        repository.setConnectedByRoomIdAndUserId(roomId, userId, false);
     }
 
     // 스무고개 ======================================================================
@@ -109,14 +93,17 @@ public class RoomMemberService {
     }
 
     public void twentyReady(Long roomId, Long userId) {
-        repository.findByRoomIdAndUserId(roomId, userId).setTwentyReady(true);
+        repository.setTwentyReadyByRoomIdAndUserId(roomId, userId, true);
     }
     public void twentyUnready(Long roomId, Long userId) {
-        repository.findByRoomIdAndUserId(roomId, userId).setTwentyReady(false);
+        repository.setTwentyReadyByRoomIdAndUserId(roomId, userId,false);
     }
-    public void twentyUnreadyAllMember(Long roomId) {
-        repository.findByRoomId(roomId).forEach(roomMember -> roomMember.setTwentyReady(false));
+
+    public void twentyUnreadyAll(Long roomId) {
+        repository.setTwentyReadyAllByRoomId(roomId, false);
+
     }
+
     public boolean isTwentyAllReady(Long roomId) {
         return countTwentyReadyMemberByRoomId(roomId) == countRoomMember(roomId);
     }

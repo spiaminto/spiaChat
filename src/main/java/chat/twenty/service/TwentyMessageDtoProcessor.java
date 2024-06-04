@@ -11,6 +11,15 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
+/*
+ * 구조 : Controller - DtoProcessor - TwentyGameService - lowerServices
+ * 처리:
+ *  Controller
+ *  -> DtoProcessor.processMessage(dto) - 하위 서비스 처리및 DB 저장후 Dto 반환
+ *  -> Controller.convertAndSend(dto)
+ *  -> DtoProcessor.processGpt(dto) - 하위 서비스 처리후 resultDto(gpt) 생성및 DB 저장후 반환
+ *  -> Controller.convertAndSend(resultDto)
+ */
 /**
  * 스무고개 방 메시지 타입별 처리를 TwentyGameService 에 위임
  */
@@ -19,7 +28,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class TwentyMessageDtoProcessor {
 
-    private final TwentyGameService twentyService; // twentyService 에만 의존할 것.
+    private final TwentyGameService twentyService;
     private final ChatMessageService chatMessageService; // DB 저장에만 사용
 
     public TwentyMessageDto processMessage(TwentyMessageDto twentyMessageDto) {
@@ -57,7 +66,7 @@ public class TwentyMessageDtoProcessor {
         twentyMessageDto.setCreatedAt(LocalDateTime.now().withNano(0));
 
         // DB 에 메시지 저장
-        ChatMessage twentyMessage = MessageDtoMapper.INSTANCE.toTwentyMessageFromTwenty(twentyMessageDto);
+        ChatMessage twentyMessage = MessageDtoMapper.INSTANCE.toChatMessageFromTwenty(twentyMessageDto);
         chatMessageService.saveMessage(twentyMessage);
 
         log.info("FINISH processMessage() TwentyMessageDto = {}", twentyMessageDto);
@@ -75,7 +84,7 @@ public class TwentyMessageDtoProcessor {
 
         switch (messageType) {
             case TWENTY_GAME_START:
-                resultTwentyMessageDto = twentyService.proceedStart(roomId);
+                resultTwentyMessageDto = twentyService.proceedStart(roomId, userId);
                 break;
             case TWENTY_GAME_ASK:
                 resultTwentyMessageDto = twentyService.proceedGame(roomId, userId, twentyMessageDto.getOrder());
@@ -92,7 +101,7 @@ public class TwentyMessageDtoProcessor {
         resultTwentyMessageDto.setCreatedAt(LocalDateTime.now().withNano(0));
 
         // DB 에 메시지 저장
-        ChatMessage twentyMessage = MessageDtoMapper.INSTANCE.toTwentyMessageFromTwenty(resultTwentyMessageDto);
+        ChatMessage twentyMessage = MessageDtoMapper.INSTANCE.toChatMessageFromTwenty(resultTwentyMessageDto);
         chatMessageService.saveMessage(twentyMessage);
 
         log.info("FINISH processGPT() TwentyMessageDto = {}, ResultTwentyMessageDto = {}", twentyMessageDto, resultTwentyMessageDto);

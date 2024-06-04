@@ -11,22 +11,27 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-/**
- * ChatMessageService 내부에 preProcessMessage() 가 존재했으나, 순환참조 문제로 인해
- * ChatMessageService 가 roomService, gptService 등에 의존하는것을 끊어내기 위해 만듦.
- *
- * 전처리 = 사용자에게 받은 메시지를 converAndSend 로 돌려주기 전의 처리
+/*
+ * 구조 : Controller - DtoProcessor - ChattingService - lowerServices
+ * 처리:
+ *  Controller
+ *  -> DtoProcessor.processMessage(dto) - 하위 서비스 처리및 DB 저장후 Dto 반환
+ *  -> Controller.convertAndSend(dto)
+ *  -> DtoProcessor.processGpt(dto) - 하위 서비스 처리후 resultDto(gpt) 생성 및 DB 저장 후 반환
+ *  -> Controller.convertAndSend(resultDto)
  */
 
+/**
+ * 일반 채팅방  메시지 타입별 처리를 ChattingService 에 위임
+ */
 @Component
 @Slf4j
 @RequiredArgsConstructor
 public class ChatMessageDtoProcessor {
 
     private final ChattingService chattingService;
-    private final ChatMessageService messageService;
+    private final ChatMessageService messageService; // DB 저장용
 
-    // 메시지 전처리
     public ChatMessageDto processMessage(ChatMessageDto chatMessageDto) {
         Long userId = chatMessageDto.getUserId();
         Long roomId = chatMessageDto.getRoomId();

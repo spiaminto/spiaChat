@@ -60,14 +60,8 @@ dependencies {
     // Object to byteArray, StringUtils.replace
     implementation 'org.apache.commons:commons-lang3:3.0'
 
-    // MultiKeyMap
-    implementation 'org.apache.commons:commons-collections4:4.4'
-
     // mysql
     runtimeOnly 'com.mysql:mysql-connector-j'
-
-    // Mybatis
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
 
     // log4jdbc
     implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'

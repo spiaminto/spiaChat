@@ -14,27 +14,17 @@ public class RoomMember {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id") private Long id;
 
-    private Long userId; //  user 는 연관관계X
+    private Long userId; //  user_id idx
 
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "room_id") @ToString.Exclude @JsonBackReference
-    private ChatRoom room;
+    @ToString.Exclude @JsonBackReference
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "room_id")
+    private ChatRoom room; // room_id idx
 
-    @Column(columnDefinition = "varchar(16)") private String username;    // 조회용 유저이름
-    @Column(columnDefinition = "TINYINT(1)") private boolean roomConnected;
-    @Column(columnDefinition = "TINYINT(1)") private boolean roomOwner;
-    @Column(columnDefinition = "TINYINT(1)") private boolean gptOwner;
-    @Column(columnDefinition = "TINYINT(1)") private boolean twentyReady;
-    @Column(columnDefinition = "varchar(8)") private String gptUuid;     // GPT activate 시의 세션구분. isGptOwner = true 일때 사용
-
-    /**
-     * roomId, userId 로 RoomMember 생성
-     */
-//    public RoomMember(Long roomId, Long userId) {
-//        this.userId = userId;
-//        this.roomId = roomId;
-//        this.roomConnected = true;
-//        this.roomOwner = false;
-//    }
+    private String username;
+    private boolean roomConnected;
+    private boolean roomOwner;
+    private boolean gptOwner;
+    private boolean twentyReady;
 
     /**
      * roomId, userId, username 로 RoomMember 생성
@@ -46,5 +36,14 @@ public class RoomMember {
         this.roomConnected = true;
         this.roomOwner = false;
     }
+
+    /*
+     column definition
+     @Column(columnDefinition = "varchar(16)") private String username;    // 조회용 유저이름
+    @Column(columnDefinition = "TINYINT(1)") private boolean roomConnected;
+    @Column(columnDefinition = "TINYINT(1)") private boolean roomOwner;
+    @Column(columnDefinition = "TINYINT(1)") private boolean gptOwner;
+    @Column(columnDefinition = "TINYINT(1)") private boolean twentyReady;
+     */
 
 }

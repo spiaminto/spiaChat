@@ -247,9 +247,8 @@
           let currentUsername = '';
 
           // thCurrentMember 로 초기화할 변수 (갱신되지 않는 변수들)
-          // thCurrentMember 는 방장이 아닌 일반유저의 경우, 방 첫 입장때 null 이다.
-          let isCurrentUserRoomOwner =
-              thCurrentMember ? thCurrentMember.isRoomOwner : false; // 내가 방장인지 여부
+
+          let isCurrentUserRoomOwner = thCurrentMember.roomOwner; // 내가 방장인지 여부
           // console.log("isCurrentUserRoomOwner = {}", isCurrentUserRoomOwner);
 
           // 필요시 초기화될 변수
@@ -351,6 +350,7 @@
                   // 서버의 endpoint 에 연결 후 메시지 수신마다 콜백실행 (responseMessage 은 서버에서 전송한 메시지)
                   currentSubscription = stompClient.subscribe(subUrl, function (responseMessageDto) {
                       let responseMessage = JSON.parse(responseMessageDto.body)
+                      // console.log("responseMessage = ", responseMessage);
                       processMessage(responseMessage);
                   });
 
@@ -364,8 +364,8 @@
            */
           async function initAfterConnect() {
               await initializeMemberList();
-
-              if (thCurrentRoom.isGptActivated) {
+              // console.log(thCurrentRoom)
+              if (thCurrentRoom.gptActivated) {
                   // 플레이 중 입장 - 관전
                   isPlaying = true;
                   disableAllMenuBtnExceptMemberListBtn();
@@ -448,7 +448,7 @@
               }
 
               let sendMessageDto = {
-                  'roomId': thCurrentMember.roomId,
+                  'roomId': thCurrentRoom.id,
                   'userId': thCurrentMember.userId,
                   'type': chatMessageType,
                   'username': usernameVal,
@@ -508,7 +508,10 @@
 
                       // 버튼처리
                       changeReadyBtnStyle(isCurrentUserReady);
-                      // console.log(isCurrentUserRoomOwner, readyUserCount, allUserCount);
+                      // console.log("currentUserRoomOwner / 레디 / 올유저");
+                      // console.log(isCurrentUserRoomOwner)
+                      // console.log(readyUserCount)
+                      // console.log(allUserCount)
                       isCurrentUserRoomOwner && (readyUserCount == allUserCount) ? enableStartBtn() : disableStartBtn(); // 방장 && 올레디 시작버튼 사용가능
 
                       needShowMessage = false;
@@ -528,11 +531,12 @@
 
                   case 'TWENTY_GAME_START':
                       // 상태처리
+                      await syncMemberList(isPlaying, responseMessage.userId) // START
                       isPlaying = true;
-                      initializeMemberListAlive(isPlaying); // 생존자 표시 초기화
+                      await initializeMemberListAlive(isPlaying); // 생존자 표시 초기화
                       playerInfoList = responseMessage.memberInfoList;
                       currentGptUuid = responseMessage.gptUuid;
-                      initializeOrder();
+                      initializeOrder(); // 내순서 초기화
                       alivePlayerCount = readyUserCount; // 생존자 초기화
                       remainingOrderCount = myTwentyOrder; // 첫 남은순서는 내 order index 만큼.
 
@@ -549,9 +553,8 @@
 
                   case 'TWENTY_GAME_END' :
                       // 상태처리
-                      await syncMemberList(isPlaying, responseMessage.userId)// GAME END
+                      await syncMemberList(isPlaying, responseMessage.userId) // GAME END
                       isPlaying = false;
-                      initializeMemberListAlive(isPlaying); // 생존자 표시 초기화
                       isCurrentUserReady = false;
                       twentyWinner = responseMessage.twentyWinner;
                       if (twentyWinner) alert(twentyWinner + " 승리!");
@@ -559,6 +562,7 @@
                       elapsedTurn = 0;
                       currentQuestionCount = 0;
                       isCurrentUserDead = false;
+                      deadPlayerCount = 0;
 
                       // 버튼처리
                       enableAllMenuBtnExceptStartBtn();
@@ -570,8 +574,11 @@
                       // 스타일처리
                       inputStatus.innerText = '대기중';
                       conversationInput.classList.remove('twenty-asking-conversation-input');
+                      contentInput.setAttribute("placeholder", "채팅 메시지 입력");
                       infoIsPlaying.innerText = isPlaying ? '게임중' : '대기중';
                       inputStatus.classList.remove('input-status-dead');
+                      initializeMemberListAlive(isPlaying); // 생존자 표시 초기화
+                      document.querySelectorAll(".member-is-twenty-ready").forEach(item => item.remove()); // 준비됨 표시 초기화
                       break;
 
                   case 'TWENTY_GAME_ERROR':
@@ -626,7 +633,7 @@
                       break;
                   default:
                       needShowMessage = false;
-                      console.log("PROCESS MESSAGE DEFAULT CASE ============================", responseMessage);
+                      // console.log("PROCESS MESSAGE DEFAULT CASE ============================", responseMessage);
                       break;
               } //switch
 
@@ -789,8 +796,13 @@
 
           /**
            * 처음들어갈때 멤버리스트 초기화 및 생성
+           *  + 게임시작, 게임끝 등 한꺼번에 여러명의 멤버리스트를 수정해야 할때 사용
            */
           async function initializeMemberList() {
+
+              // 이전 멤버리스트 삭제
+              let legacyMemberList = document.querySelector(".member-list-item");
+              legacyMemberList ? legacyMemberList.forEach(item => item.remove()) : null;
 
               const response = await fetchMemberList();
               // console.log('initializeMemberList()', response);
@@ -857,7 +869,7 @@
                   if (isPlaying) return; // 플레이중인경우 후처리 무시
 
                   // ready 된 유저 수 계산
-                  readyUserCount = responseMember.isTwentyGameReady ? ++readyUserCount : readyUserCount;
+                  readyUserCount = responseMember.twentyReady ? ++readyUserCount : readyUserCount;
               });
 
               // console.log("readyUserCount : " + readyUserCount);
@@ -907,7 +919,7 @@
               memberUsername.textContent = modifiedMemberResponse.username;
               newMemberListItemHeader.appendChild(memberUsername);
 
-              let isRoomOwner = modifiedMemberResponse.isRoomOwner; // boolean
+              let isRoomOwner = modifiedMemberResponse.roomOwner; // boolean
               if (isRoomOwner) {
                   // 수정 대상이 방장
                   let memberIsRoomOwner = document.createElement('span');
@@ -926,7 +938,7 @@
                   }
               }
 
-              let isMemberConnected = modifiedMemberResponse.isRoomConnected; // boolean
+              let isMemberConnected = modifiedMemberResponse.roomConnected; // boolean
               let memberIsRoomConnected = document.createElement('span');
               memberIsRoomConnected.classList.add('member-is-room-connected');
               let connectedColorClass = isMemberConnected ? 'member-connected' : 'member-disconnected';
@@ -935,7 +947,7 @@
               newMemberListItemContent.appendChild(memberIsRoomConnected);
 
               // 게임중이 아닐때 레디상태 표시
-              let isTwentyReady = modifiedMemberResponse.isTwentyGameReady; // boolean
+              let isTwentyReady = modifiedMemberResponse.twentyReady; // boolean
               let memberIsTwentyReady = document.createElement('span');
               memberIsTwentyReady.classList.add('member-is-twenty-ready');
               memberIsTwentyReady.textContent = isTwentyReady ? '준비됨' : '';
@@ -1059,7 +1071,7 @@
       <!--    <span id="roomName" th:text="|name ${chatRoom.getName}|">roomName</span>-->
       <span id="roomType" th:text="|${chatRoom.getType().roomTypeName}|">roomType</span>
       <span id="twentySubject" th:text="'주제: ' + ${chatRoom.subject.getSubjectName()}"></span>
-      <span id="twentyCustomSubject" th:if="${chatRoom.subject == T(chat.twenty.enums.TwentyGameSubject).CUSTOM}"
+      <span id="twentyCustomSubject" th:if="${chatRoom.subject.name() == 'CUSTOM'}"
             th:text="'->' + ${chatRoom.customSubject}"></span>
       <span id="infoIsPlaying">대기중</span>
     </div>
@@ -1137,6 +1149,7 @@
       </div>
     </form>
   </div>
+
 </div> <!-- container -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"

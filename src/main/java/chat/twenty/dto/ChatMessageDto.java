@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Front-Back 간에 메시지 주고받는 DTO
+ * Front-Controller 간에 메시지 주고받는 DTO
  */
 
 @Data

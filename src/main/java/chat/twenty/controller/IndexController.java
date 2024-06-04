@@ -44,12 +44,9 @@ public class IndexController {
 
         Thread.sleep(100); // EventListener 작업 대기
 
-        List<ChatRoom> roomList = roomService.findAll();
-        List<ChatRoomDto> roomDtoList = roomList.stream()
-                .map(room -> ChatRoomDto.from(room, memberService.countConnectedMember(room.getId())))
-                .collect(Collectors.toList()); // 접속중인 membercount 추가
-
-        model.addAttribute("roomList", roomDtoList);
+        // 방 목록 + 접속중 카운트 조회
+        List<ChatRoomDto> chatRoomDtoList = roomService.findRoomWithConnectedCount();
+        model.addAttribute("roomList", chatRoomDtoList);
 
         if (isBanned) {
             model.addAttribute("alertMessage", "방장에 의해 강퇴되었습니다.");
@@ -69,8 +66,8 @@ public class IndexController {
     public String createRoom(@Validated @ModelAttribute RoomAddForm roomAddForm,
                              BindingResult bindingResult, Model model,
                              @AuthenticationPrincipal PrincipalDetails principalDetails) {
+//        log.info("chatroom = {}, currentUser = {}", roomAddForm, principalDetails.getUser());
         User currentUser = principalDetails.getUser();
-        log.info("chatroom = {}, currentUser = {}", roomAddForm, currentUser);
 
         if (bindingResult.hasErrors()) {
             log.info("bindingResult = {}", bindingResult);
@@ -93,7 +90,7 @@ public class IndexController {
         ChatRoom savedRoom = roomService.save(chatRoom);
 
         // 방 멤버이자 오너로 입장
-        memberService.enterRoom(savedRoom.getId(), currentUser.getId(), true);
+        memberService.enterRoom(savedRoom, currentUser.getId(), currentUser.getUsername(), true);
 
         return "redirect:/room/" + savedRoom.getId();
     }
@@ -101,24 +98,29 @@ public class IndexController {
     @GetMapping("/room/{roomId}")
     public String enterRoom(@PathVariable Long roomId, Model model,
                             @AuthenticationPrincipal PrincipalDetails principalDetails) throws InterruptedException {
-        log.info("enterRoom() roomId = {}", roomId);
+//        log.info("enterRoom() roomId = {}", roomId);
+        User currentUser = principalDetails.getUser();
         Thread.sleep(100); // EventListener 작업 대기 (LEAVE WHILE PLAYING 등)
 
         // room 정보 불러오기
-        ChatRoom currentRoom = roomService.findById(roomId);
+        ChatRoom currentRoom = roomService.findRoomWithMembers(roomId);
         if (currentRoom == null) {
             return "redirect:/?isRoomDeleted=true"; // room 없음
         }
-        model.addAttribute("chatRoom", currentRoom);
 
-        // Member 존재여부 확인
-        if (!memberService.existsMember(roomId, principalDetails.getId())) {
+        // currentRoom 에 currentUser 가 속해 있는지 확인
+        RoomMember findMember = currentRoom.getMembers().stream()
+                .filter(roomMember -> roomMember.getUserId().equals(currentUser.getId()))
+                .findFirst().orElse(null);
+        if (findMember == null) {
             // 첫입장 처리
-            memberService.enterRoom(roomId, principalDetails.getId(), false);
+            memberService.enterRoom(currentRoom, currentUser.getId(),currentUser.getUsername(), false);
+            findMember = memberService.findByRoomIdAndUserId(roomId, currentUser.getId());
         }
 
-        RoomMember findMember = memberService.findByRoomIdAndUserId(roomId, principalDetails.getId());
         model.addAttribute("currentMember", findMember);
+        model.addAttribute("currentRoomId", roomId);
+        model.addAttribute("chatRoom", currentRoom);
 
         ChatRoomType currentRoomType = currentRoom.getType();
         if (currentRoomType == ChatRoomType.CHAT) {

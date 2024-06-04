@@ -21,8 +21,7 @@ public class TwentyGameExceptionHandler {
     private final SimpMessagingTemplate messageTemplate;
     private final UserService userService;
 
-    //TWENTY_GAME_ERROR 로 nextUserId 를 내려주지 않도록 한다.
-    //  그래야 프론트에서 쓰던 nextUserId 를 그대로 사용해서 처리.
+    //TWENTY_GAME_ERROR 로 nextUserId 를 내려주지 않도록 한다. 그래야 프론트에서 쓰던 nextUserId 를 그대로 사용해서 처리.
 
     @MessageExceptionHandler(TwentyGameOrderNotValidException.class)
     public void handleTwentyGameOrderNotValidException(TwentyGameOrderNotValidException e) {

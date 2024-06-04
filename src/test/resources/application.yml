@@ -3,6 +3,8 @@ spring:
     group:
         local: gpt, datasource
         prod: gpt, datasource
+        test: gpt, datasource
+    active: test
   thymeleaf:
     prefix: classpath:/templates/   #spring.mvc.static-path-pattern=/static/**
     servlet:
@@ -13,7 +15,7 @@ spring:
     hibernate:
       ddl-auto: none
 
-aopLogging: true
+aopLogging: false
 
 logging:
   config: classpath:logback-local.xml

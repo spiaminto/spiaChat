@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -33,13 +34,9 @@ public class TwentyWebSocketEventListener {
 
     @EventListener
     public void webSocketConnectListener(TwentyConnectEvent event) {
-        User currentUser = event.getUser();
-        Long currentUserId = currentUser.getId();
+        Long currentUserId = event.getUser().getId();
         Long currentRoomId = event.getRoomId();
 
-        // 현재 접속한 사용자를 채팅방에 추가
-//        memberService.enterRoom(currentRoomId, currentUserId, false);
-        // 접속한 사용자의 isRoomConnected = true
         memberService.connectToRoom(currentRoomId, currentUserId);
     }
 
@@ -54,15 +51,27 @@ public class TwentyWebSocketEventListener {
 
     // 브라우저의 beforeUnload 이벤트 리스너를 통해 Disconnect 메시지가 전송된다. (이때는 Unsubscribe 발생X)
     @EventListener
+    @Transactional // 조회를 줄이기 위해 사용 //메모 1
     public void webSocketDisconnectListener(TwentyDisconnectEvent event) {
         User user = event.getUser();
         Long roomId = event.getRoomId();
 
+        RoomMember member = memberService.findByRoomIdAndUserId(roomId, user.getId());
+        if (member == null) { return; /* Unsubscribe 에서 이미 나간 유저 */ }
+        
+        member.setRoomConnected(false);
+        boolean isPlayerDeleted = false; // 나간 플레이어가 관전자일 경우 false 유지
+        if (member.isTwentyReady()) { // 게임중일때는 무조건 ready = true
+            isPlayerDeleted = memberInfoService.deleteByUserId(user.getId());// 게임중 정보 제거
+        }
+        member.setTwentyReady(false);
+
+        //LEGACY
+            /*
         if (!memberService.existsMember(roomId, user.getId())) {
-            return; /* Unsubscribe 에서 이미 나감 처리된 유저 */
+            return; // Unsubscribe 에서 이미 나감 처리된 유저
         }
 
-        // 현재 접속한 사용자를 채팅방에서 connected false
         memberService.disconnectFromRoom(roomId, user.getId());
         memberService.twentyUnready(roomId, user.getId());
 
@@ -71,6 +80,7 @@ public class TwentyWebSocketEventListener {
         if (roomService.findById(roomId).isGptActivated()) {
             isPlayerDeleted = memberInfoService.deleteByUserId(user.getId());
         }
+             */
 
         TwentyMessageDto twentyMessageDto = TwentyMessageDto.createDisconnectMessage(event.getUser().getId(), user.getUsername(), isPlayerDeleted);
         messagingTemplate.convertAndSend("/topic/twenty-game/" + roomId, twentyMessageDto);
@@ -82,9 +92,10 @@ public class TwentyWebSocketEventListener {
     public void WebSocketUnsubscribeListener(TwentyUnsubscribeEvent event) {
         User user = event.getUser();
         Long roomId = event.getRoomId();
+        RoomMember member = memberService.findByRoomIdAndUserId(roomId, user.getId());
 
         // 나간사람이 방장일때
-        if (memberService.findByRoomIdAndUserId(roomId, user.getId()).isRoomOwner()) {
+        if (member.isRoomOwner()) {
             memberService.leaveRoomAllMember(roomId); // 방의 모든 member 삭제
             roomService.deleteById(roomId); // 방 삭제
             // 메시지는 일단 삭제하지 않음.

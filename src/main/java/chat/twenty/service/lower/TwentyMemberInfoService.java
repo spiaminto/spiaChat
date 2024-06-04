@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 
@@ -16,8 +17,8 @@ import java.util.List;
 public class TwentyMemberInfoService {
     private final TwentyMemberInfoRepository repository;
     @Transactional(readOnly = true)
-    public TwentyMemberInfo findById(Long userId) {
-        return repository.findById(userId).orElse(null);
+    public TwentyMemberInfo findByUserId(Long userId) {
+        return repository.findByUserId(userId);
     }
     @Transactional(readOnly = true)
     public List<TwentyMemberInfo> findByRoomId(Long roomId) {
@@ -26,6 +27,10 @@ public class TwentyMemberInfoService {
     @Transactional(readOnly = true)
     public TwentyMemberInfo findByRoomIdAndOrder(Long roomId, int order) {
         return repository.findByRoomIdAndTwentyOrder(roomId, order);
+    }
+    @Transactional(readOnly = true)
+    public long countByRoomId(Long roomId) {
+        return repository.countByRoomId(roomId);
     }
     @Transactional(readOnly = true)
     public boolean isRoomAllDead(Long roomId) {
@@ -64,6 +69,9 @@ public class TwentyMemberInfoService {
 
     public long deleteByRoomId(Long roomId) {
         return repository.deleteByRoomId(roomId);
+    }
+    public long deleteAllByRoomId(Long roomId) {
+        return repository.deleteAllByRoomId(roomId);
     }
 
 }

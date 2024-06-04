@@ -1,6 +1,8 @@
 package chat.twenty.service.gpt;
 
 import chat.twenty.domain.ChatMessage;
+import chat.twenty.domain.ChatRoom;
+import chat.twenty.domain.RoomMember;
 import chat.twenty.dto.ChatMessageDto;
 import chat.twenty.dto.TwentyMessageDto;
 import chat.twenty.enums.ChatMessageType;
@@ -17,9 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
+import javax.persistence.EntityManager;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,47 +44,43 @@ public class CustomGptService {
     private final RoomMemberService memberService;
     private final ChatRoomService roomService;
     private final ChatMessageService chatMessageService;
-//    private final TwentyMessageService twentyMessageService;
+    private final EntityManager em;
 
     /**
      * Member 와 Chatroom 에서 gpt 활성화, 활성화된 gpt 의 UUID 반환
      */
     public String activateGpt(Long roomId, Long userId) {
-        memberService.updateGptOwner(roomId, userId, true);
         String gptUuid = java.util.UUID.randomUUID().toString().substring(0, 8);
-        memberService.updateGptUuid(roomId, userId, gptUuid);
 
-        roomService.updateGptActivated(roomId, true);
+        ChatRoom room = roomService.findById(roomId);
+        room.setGptActivated(true);
+        room.setGptUuid(gptUuid);
+
+        RoomMember member = memberService.findByRoomIdAndUserId(roomId, userId); // 엔티티의 데이터변경을 위해 조회
+        member.setGptOwner(true);
         return gptUuid;
     }
 
     /**
      * Member 와 Chatroom 에서 gpt 비활성화, 성공여부 반환
      */
-    public boolean deActivateGpt(Long roomId, Long userId) {
-        boolean isSuccess = false;
-        boolean isGptOwner = validateGptOwner(roomId, userId);
-        if (isGptOwner) {
-            memberService.updateGptOwner(roomId, userId, false);
-            memberService.updateGptUuid(roomId, userId, null);
-            roomService.updateGptActivated(roomId, false);
-            isSuccess = true;
+    public void deActivateGpt(Long roomId, Long userId) {
+        RoomMember member = memberService.findByRoomIdAndUserId(roomId, userId);
+        log.info("deActivateGpt, isGptOwner = {}, roomId = {}, userId = {}", member.isGptOwner(), roomId, userId);
+        if (member.isGptOwner()) {
+            member.setGptOwner(false);
+            ChatRoom room = roomService.findById(roomId);
+            room.setGptActivated(false);
+            room.setGptUuid(null);
         }
-        log.info("deActivateGpt, isGptOwner = {}, roomId = {}, userId = {}", isGptOwner, roomId, userId);
-        return isSuccess;
-    }
-
-    protected boolean validateGptOwner(Long roomId, Long userId) {
-        return memberService.findByRoomIdAndUserId(roomId, userId).isGptOwner();
     }
 
     /**
-     * 외부사용 public
      * RoomMember, MessageType 을 이용하여 GPT 답변 메시지를 생성후 리턴
      */
     public ChatMessageDto sendGptChatRequest(Long roomId) {
         // gpt 식별자 획득
-        String gptUuid = memberService.findGptUuidByRoomId(roomId);
+        String gptUuid = roomService.findById(roomId).getGptUuid();
         // 현재 gpt 와의 채팅목록 조회
         List<ChatMessage> chatMessageList = chatMessageService.findCurrentGptQueue(roomId, gptUuid);
 
@@ -101,11 +101,10 @@ public class CustomGptService {
     /**
      * 스무고개 게임 진행중 GPT 에게 질문을 보냄.
      */
-    public TwentyMessageDto sendGptTwentyRequest(Long roomId) {
-        // gpt 식별자 획득
-        String gptUuid = memberService.findGptUuidByRoomId(roomId);
-        // 게임 주제 획득
-        TwentyGameSubject subject = roomService.findById(roomId).getSubject();
+    public TwentyMessageDto sendGptTwentyRequest(Long roomId, Long userId) {
+        ChatRoom room = roomService.findById(roomId);
+        String gptUuid = room.getGptUuid(); // gpt 식별자 획득
+        TwentyGameSubject subject = room.getSubject(); // 게임 주제 획득
 
         // roomId 와 gptUuid 를 기반으로, 현재 gpt 와의 채팅목록 조회
         List<ChatMessage> twentyMessageList = chatMessageService.findCurrentGptQueue(roomId, gptUuid);
@@ -143,6 +142,7 @@ public class CustomGptService {
                 firstMessage.setGptPrompt(GptPrompt.CHAT_PROMPT.prompt);
                 break;
             case TWENTY_GAME_START:
+                em.detach(firstMessage); // 영속성 제거 (DB 변경X, GPT 내용보내기 전용)
                 // subject not null
                 if (subject == TwentyGameSubject.CUSTOM)
                     // 아직 임시 구현, 사용자지정 주제

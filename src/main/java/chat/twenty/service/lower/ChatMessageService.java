@@ -2,7 +2,6 @@ package chat.twenty.service.lower;
 
 import chat.twenty.domain.ChatMessage;
 import chat.twenty.repository.ChatMessageRepository;
-import chat.twenty.repository.LegacyChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

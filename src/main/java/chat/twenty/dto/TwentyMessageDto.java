@@ -5,6 +5,7 @@ import chat.twenty.enums.ChatMessageType;
 import chat.twenty.enums.UserType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,12 +13,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Front-Back 간에 메시지 주고받는 DTO
+ * Front-Controller 간에 메시지 주고받는 DTO
  */
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class TwentyMessageDto {
     private Long roomId;
     private Long userId;

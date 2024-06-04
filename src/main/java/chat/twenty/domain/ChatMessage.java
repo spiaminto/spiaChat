@@ -12,21 +12,22 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity  @Table(name = "chat_message")
-@Builder
+@Builder // mapStruct 에서 사용중
 public class ChatMessage {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "message_id") protected Long id;        // auto_increment
+    @Column(name = "message_id") private Long id;        // auto_increment
 
-    // 아래 두 id 는 index 걸것.
-    protected Long roomId;
-    protected Long userId;
+    private Long roomId;
+    private Long userId;
 
-    @Column(columnDefinition = "varchar(16)") protected String username;    // 유저명
-    @Column(columnDefinition = "varchar(30)") @Enumerated(EnumType.STRING) protected ChatMessageType type;       // DB DEFAULT NONE
-    @Column(columnDefinition = "varchar(100)") protected String content;
-    @Column(columnDefinition = "TIMESTAMP") protected LocalDateTime createdAt;  // DB DEFAULT CURRENT_TIMESTAMP
-    @Column(columnDefinition = "TINYINT(1)") private boolean gptChat;      // Gpt 와의 대화인지 여부, DB DEFAULT false
-    @Column(columnDefinition = "varchar(8)") private String gptUuid;    // GPT activate 시의 세션구분. UUID(8)
+    @Enumerated(EnumType.STRING)
+    private ChatMessageType type;       // DB DEFAULT NONE
+
+    private String username;    // 유저명
+    private String content;
+    private LocalDateTime createdAt;  // DB DEFAULT CURRENT_TIMESTAMP
+    private boolean gptChat;      // Gpt 와의 대화인지 여부, DB DEFAULT false
+    private String gptUuid;    // GPT activate 시의 세션구분. UUID(8)
 
     /**
      * 일반채팅 생성자
@@ -67,5 +68,18 @@ public class ChatMessage {
     public void setGptPrompt(String prompt) {
         this.content = prompt;
     }
+
+    /*
+    ddl
+    @Column(columnDefinition = "varchar(30)")
+    @Enumerated(EnumType.STRING) private ChatMessageType type;       // DB DEFAULT NONE
+
+
+    @Column(columnDefinition = "varchar(16)") private String username;    // 유저명
+    @Column(columnDefinition = "varchar(100)") private String content;
+    @Column(columnDefinition = "TIMESTAMP") private LocalDateTime createdAt;  // DB DEFAULT CURRENT_TIMESTAMP
+    @Column(columnDefinition = "TINYINT(1)") private boolean gptChat;      // Gpt 와의 대화인지 여부, DB DEFAULT false
+    @Column(columnDefinition = "varchar(8)") private String gptUuid;    // GPT activate 시의 세션구분. UUID(8)
+     */
 
 }
