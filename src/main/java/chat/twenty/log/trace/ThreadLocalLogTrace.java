@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ThreadLocalLogTrace implements LogTrace {
 
-    private static final String START_PREFIX = "->";
-    private static final String COMPLETE_PREFIX = "<-";
-    private static final String EX_PREFIX = "<X";
+    private static final String START_PREFIX = ">";
+    private static final String COMPLETE_PREFIX = "<";
+    private static final String EX_PREFIX = "X";
 
     private ThreadLocal<TraceId> traceIdHolder = new ThreadLocal<>(); // 동시성 문제해결
 
@@ -43,7 +43,8 @@ public class ThreadLocalLogTrace implements LogTrace {
     private void complete(TraceStatus status, Exception e, Object[] params) {
         TraceId traceId = status.getTraceId();
         if (e == null) {
-            log.info("[{}] {}{}", traceId.getId(), addSpace(COMPLETE_PREFIX, traceId.getLevel()), status.getMessage());
+            // 오는방향 로그는 주석처리 - 개발중엔 로그가 너무 긺.
+            // log.info("[{}] {}{}", traceId.getId(), addSpace(COMPLETE_PREFIX, traceId.getLevel()), status.getMessage());
         } else {
             // exception 발생 시 파라미터를 같이 출력
             StringBuilder sb = new StringBuilder();
@@ -87,7 +88,7 @@ public class ThreadLocalLogTrace implements LogTrace {
     private static String addSpace(String prefix, int level) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < level; i++) {
-            sb.append( (i == level - 1) ? "|" + prefix : "|  ");
+            sb.append( (i == level - 1) ? "|" + prefix : "| ");
         }
         return sb.toString();
     }

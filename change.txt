@@ -17,3 +17,6 @@ master commit 4
 
 master commit 4.1
     커밋 수정
+
+master commit 4.2
+    gpt 옵션 재작성, 로그 단축

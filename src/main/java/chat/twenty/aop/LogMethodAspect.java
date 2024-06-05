@@ -22,13 +22,13 @@ public class LogMethodAspect {
 
     // Pointcut 표현식 분리
     @Pointcut("execution(* chat.twenty.controller..*(..))")
-    public void allController() {};
+    public void allController() {}
 
     @Pointcut("execution(* chat.twenty.service..*(..))")
-    public void allService() {};
+    public void allService() {}
 
     @Pointcut("execution(* chat.twenty.repository..*(..))")
-    public void allRepository() {};
+    public void allRepository() {}
 
     @Around("allController() || allService() || allRepository()")
     public Object execute(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -42,8 +42,7 @@ public class LogMethodAspect {
 
             Object result = joinPoint.proceed();
 
-            // 로그가 너무 길고 복잡해 exception 만 남기고 주석
-//            logTrace.end(status);
+            logTrace.end(status);
             return result;
         } catch (Exception e) {
             // Exception 발생시, end 가 아닌 exception 호출
