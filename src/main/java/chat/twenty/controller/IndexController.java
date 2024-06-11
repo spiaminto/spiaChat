@@ -71,10 +71,8 @@ public class IndexController {
 
         if (bindingResult.hasErrors()) {
             log.info("bindingResult = {}", bindingResult);
-            model.addAttribute("roomList",
-                    roomService.findAll().stream()
-                    .map(room -> ChatRoomDto.from(room, memberService.countConnectedMember(room.getId())))
-                    .collect(Collectors.toList())); // 접속중인 membercount 추가
+            List<ChatRoomDto> chatRoomDtoList = roomService.findRoomWithConnectedCount();
+            model.addAttribute("roomList", chatRoomDtoList);
             model.addAttribute("isCreateRoomError", true);
             return "index";
         }

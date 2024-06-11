@@ -4,13 +4,13 @@
 ___샘플 ID: sample / PW: sample123___ , 자유롭게 이용 가능합니다.  
 
 웹 소켓을 이용한 채팅 서비스에 Chat GPT 를 적용한 프로젝트입니다.<br>
-채팅방에 접속중인 유저는 GPT 에 다대일 질문이 가능합니다.<br>
-GPT 를 이용하여 간단한 스무고개 게임도 구현해 보았습니다.
+[이전 프로젝트](https://github.com/spiamint/chatApp) 를 JPA 기술을 사용하여 리팩토링 하였습니다.<br>
+Mybatis 에서 JPA 로 전환하면서 필요없는 쿼리가 나가지 않도록, 또 기존 쿼리 횟수를 줄이기 위해 노력하였습니다.<br>
 
 ### 사용 기술
 
 * Spring(Boot), Gradle
-* Mybatis
+* Spring Data Jpa, QueryDSL
 * MySql
 * Thymeleaf
 * HTML, CSS(BootStrap), JavaScript

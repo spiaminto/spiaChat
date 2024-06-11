@@ -21,10 +21,10 @@ import java.util.Optional;
 public class RoomMemberService {
 
     private final RoomMemberRepository repository;
+    private final ChatRoomRepository roomRepository;
 
     @Transactional(readOnly = true)
     public RoomMember findByRoomIdAndUserId(Long roomId, Long userId) {
-        log.info("findByRoomIdAndUserId::currentTx = {}", TransactionSynchronizationManager.getCurrentTransactionName());
         return repository.findByRoomIdAndUserId(roomId, userId);
     }
     @Transactional(readOnly = true)

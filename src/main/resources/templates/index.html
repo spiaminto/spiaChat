@@ -141,10 +141,10 @@
                 let twentyGameOptionBox = document.getElementById('twentyGameOptionWrapper');
                 if (roomType === 'CHAT') {
                     twentyGameOptionBox.style.display = 'none';
-                    document.getElementById("customTwentyGameSubject").removeAttribute("required");
+                    // document.getElementById("customTwentyGameSubject").removeAttribute("required");
                 } else {
                     twentyGameOptionBox.style.display = 'block';
-                    document.getElementById("customTwentyGameSubject").setAttribute("required", "true");
+                    // document.getElementById("customTwentyGameSubject").setAttribute("required", "true");
                 }
             }
 
@@ -259,15 +259,15 @@
                         <div id="twentyGameOptionWrapper">
                             <label for="definedTwentyGameSubject">주제 선택</label>
                             <select id="definedTwentyGameSubject" th:field="*{subject}" name="subject" class="form-select">
-                                <option value="CUSTOM" selected>직접입력</option>
-                                <option value="FOOD">음식</option>
+<!--                                <option value="CUSTOM" selected>직접입력</option>-->
+                                <option value="FOOD" selected>음식</option>
                                 <option value="STARCRAFT">스타크래프트 유닛</option>
                             </select>
 
-                            <label for="customTwentyGameSubject">주제 직접 입력</label>
-                            <input id="customTwentyGameSubject" th:field="*{customSubject}" name="customSubject" type="text" class="form-control" value=""
-                            placeholder="최대 10 자 까지 허용합니다." th:errorclass="is-invalid">
-                            <div class="invalid-feedback" th:errors="*{customSubject}"> customSubject 오류</div>
+<!--                            <label for="customTwentyGameSubject">주제 직접 입력</label>-->
+<!--                            <input id="customTwentyGameSubject" th:field="*{customSubject}" name="customSubject" type="text" class="form-control" value=""-->
+<!--                            placeholder="최대 10 자 까지 허용합니다." th:errorclass="is-invalid">-->
+<!--                            <div class="invalid-feedback" th:errors="*{customSubject}"> customSubject 오류</div>-->
                         </div>
                     </div>
                     <div class="modal-footer">

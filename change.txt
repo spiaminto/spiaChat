@@ -20,3 +20,6 @@ master commit 4.1
 
 master commit 4.2
     gpt 옵션 재작성, 로그 단축
+
+master commit 5
+    리드미수정, 배포, 버그수정, 커스텀 주제 비활성화

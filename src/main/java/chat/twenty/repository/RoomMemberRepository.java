@@ -1,5 +1,6 @@
 package chat.twenty.repository;
 
+import chat.twenty.domain.ChatRoom;
 import chat.twenty.domain.RoomMember;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,7 +13,8 @@ import java.util.Optional;
 
 public interface RoomMemberRepository extends JpaRepository<RoomMember, Long> {
     List<RoomMember> findByRoomId(Long roomId);
-    RoomMember findByRoomIdAndUserId(Long roomId, Long userId);
+    RoomMember findByRoomIdAndUserId(Long roomId, Long userId);// Room table 과 join 발생,  
+//    RoomMember findByRoomAndUserId(ChatRoom room, Long userId); //메모 2
 
     @Query("Select m FROM RoomMember m WHERE m.room.id = :roomId AND m.roomOwner = true")
     RoomMember findRoomOwnerByRoomId(@Param("roomId") Long roomId);

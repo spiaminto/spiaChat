@@ -114,8 +114,8 @@ public class TwentyGameService {
      * 스무고개 순서 초기화
      */
     protected void resetOrder(long roomId) {
-        log.info("resetOrder::currentTx = {}", TransactionSynchronizationManager.getCurrentTransactionName());
         roomService.resetTwentyOrder(roomId);
+        log.info("roomService.resetTwentyOrder() order been reset");
     }
 
     public TwentyMessageDto proceedGame(Long roomId, Long userId, int currentOrder) {
@@ -264,10 +264,9 @@ public class TwentyGameService {
 
         RoomMember roomOwner = memberService.findRoomOwner(roomId);
         gptService.deActivateGpt(roomId, roomOwner.getUserId()); // gpt 비활성화
+        resetOrder(roomId); // 순서 초기화
 
         memberInfoService.deleteAllByRoomId(roomId); // memberInfo 삭제
-
-        resetOrder(roomId); // 순서 초기화
     }
 
     public TwentyMessageDto banMember(Long roomId, Long userId, Long banUserId) {

@@ -49,7 +49,6 @@ public class ChatRoomService {
      */
     public void resetTwentyOrder(Long id) {
         repository.findById(id).ifPresent(chatRoom -> {
-            log.info("currentTX = {}", TransactionSynchronizationManager.getCurrentTransactionName());
             chatRoom.setTwentyNext(0);
         });
     }
