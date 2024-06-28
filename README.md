@@ -1,7 +1,7 @@
 # 채팅 with GPT
 ## 개요
 ### [프로젝트 바로가기](http://spiaminto.ap-northeast-2.elasticbeanstalk.com/spiachat/lobby)    
-___샘플 ID: sample / PW: sample123___ , 자유롭게 이용 가능합니다.  
+___샘플 ID: sample / PW: sample123___ (오전 8시 ~ 오후 10시 까지 이용가능합니다.)
 
 웹 소켓을 이용한 채팅 서비스에 Chat GPT 를 적용한 프로젝트입니다.<br>
 [이전 프로젝트](https://github.com/spiamint/chatApp) 를 JPA 기술을 사용하여 리팩토링 하였습니다.<br>
